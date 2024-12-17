@@ -4,25 +4,40 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sort"
 )
 
 const indentSpace = "    "  // spaces for indent
 
 // printTree flush dir and files tree recursively
-func printTree(path string, indent string, isLast bool) {
+func printTree(path string, indent string, isLast bool, printRoot bool) {
+	// skip hidden paths
+	if strings.HasPrefix(filepath.Base(path), ".") {
+		return
+	}
+
 	// define symbols for branch
 	var branch, nextIndent string
-	if isLast {
+	if printRoot { // for root
+		branch = ""
+		nextIndent = ""
+	} else if isLast {
 		branch = "└── "
-		nextIndent = indent + indentSpace
+		nextIndent = indent + "    "
 	} else {
 		branch = "├── "
 		nextIndent = indent + "│   "
 	}
 
+	// mark current path
+	name := filepath.Base(path)
+	if info, err := os.Stat(path); err == nil && info.IsDir() {
+		name += "/" // add "/" for paths
+	}
+
 	// print current path
-	fmt.Println(indent + branch + filepath.Base(path))
+	fmt.Println(indent + branch + name)
 
 	// check if dir
 	file, err := os.Open(path)
@@ -41,14 +56,25 @@ func printTree(path string, indent string, isLast bool) {
 	// sort by name
 	sort.Slice(entries, func(i, j int) bool { return entries[i].Name() < entries[j].Name() })
 
-	// recursively print dirs and files
-	for i, entry := range entries {
-		isLastEntry := i == len(entries) - 1
+	// filter hidden
+	var filteredEntries []os.FileInfo
+	for _, entry := range entries {
+		if !strings.HasPrefix(entry.Name(), ".") {
+			filteredEntries = append(filteredEntries, entry)
+		}
+	}
+
+	for i, entry := range filteredEntries {
+		isLastEntry := i == len(filteredEntries)-1
 		childPath := filepath.Join(path, entry.Name())
 		if entry.IsDir() {
-			printTree(childPath, nextIndent, isLastEntry)
+			printTree(childPath, nextIndent, isLastEntry, false)
 		} else {
-			fmt.Println(nextIndent + "├── " + entry.Name())
+			branchSymbol := "├── "
+			if isLastEntry {
+				branchSymbol = "└── "
+			}
+			fmt.Println(nextIndent + branchSymbol + entry.Name())
 		}
 	}
 }
@@ -72,5 +98,5 @@ func main() {
 		return
 	}
 
-	printTree(root, "", true)
+	printTree(root, "", true, true)
 }
