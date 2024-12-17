@@ -25,6 +25,15 @@ A simple command-line utility written in **Go** to display the directory structu
 
 ---
 
+## Install in **PATH**
+> If you want to use it from anywhere in your linux system!
+0. [Compile](#installation). Note that you can specify output file name.
+1. Copy (or move) binary to dir that included in PATH. As usual, it is a `/usr/local/bin` 
+```bash
+sudo cp tree /usr/local/bin/tree
+```
+2. Check access via `tree --help`. If everything is ok, you will see the help.
+
 ## Usage
 
 Run the utility from the command line:
