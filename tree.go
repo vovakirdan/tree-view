@@ -8,12 +8,25 @@ import (
 	"strings"
 )
 
-const indentSpace = "    " // Number of spaces for each indentation
+const (
+	LastLeaf string = "└── "
+	MiddleLeaf string = "├── "
+	BackLeaf string = "│   "
+	IndentSpace string = "    "
+)
 
 // printTree recursively displays the directory tree structure.
 func printTree(path string, indent string, isLast bool, printRoot bool, showHidden bool, excludeList []string) {
 	// Extract the file or folder name
 	baseName := filepath.Base(path)
+	if baseName == "." {
+		absPath, err := filepath.Abs(path)
+		if err != nil {
+			fmt.Println("Error getting absolute path:", err)
+			return
+		}
+		baseName = filepath.Base(absPath)
+	}
 
 	// Skip hidden files and directories if showHidden is false
 	if !showHidden && strings.HasPrefix(baseName, ".") {
@@ -33,11 +46,11 @@ func printTree(path string, indent string, isLast bool, printRoot bool, showHidd
 		branch = ""
 		nextIndent = ""
 	} else if isLast {
-		branch = "└── "
-		nextIndent = indent + "    "
+		branch = LastLeaf
+		nextIndent = indent + IndentSpace
 	} else {
-		branch = "├── "
-		nextIndent = indent + "│   "
+		branch = MiddleLeaf
+		nextIndent = indent + BackLeaf
 	}
 
 	// Add "/" at the end for directories
