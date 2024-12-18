@@ -47,6 +47,8 @@ Run the utility from the command line:
    Show hidden files and directories (those starting with a dot `.`).
 - `-exclude=<names>`  
    Exclude files and directories by name. Pass a comma-separated list.
+- `-emoji`  
+   Shows emoji near the file or path.
 
 ### Examples
 
@@ -127,7 +129,29 @@ GoCall/
     ├── app.js
     └── index.html
 ```
+### With emoji flag
+```
+./tree -emoji
+```
 
+**Output**
+```
+📂 gocall/
+├── 📜 GoCall
+├── 📂 client/
+│   ├── 💻 main.go
+│   └── 💻 webrtc.go
+├── 📜 go.mod
+├── 📜 go.sum
+├── 💻 main.go
+├── 📂 server/
+│   ├── 💻 main.go
+│   ├── 💻 signaling.go
+│   └── 💻 webrtc.go
+└── 📂 static/
+    ├── 💻 app.js
+    └── 📜 index.html
+```
 ---
 
 ## Notes
