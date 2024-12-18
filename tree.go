@@ -9,14 +9,14 @@ import (
 )
 
 const (
-	LastLeaf string = "└── "
+	LastLeaf   string = "└── "
 	MiddleLeaf string = "├── "
-	BackLeaf string = "│   "
+	BackLeaf   string = "│   "
 	IndentSpace string = "    "
 )
 
-// printTree recursively displays the directory tree structure.
-func printTree(path string, indent string, isLast bool, printRoot bool, showHidden bool, excludeList []string) {
+// printTree recursively displays the directory tree structure with optional emoji support.
+func printTree(path string, indent string, isLast bool, printRoot bool, showHidden bool, excludeList []string, useEmoji bool) {
 	// Extract the file or folder name
 	baseName := filepath.Base(path)
 	if baseName == "." {
@@ -53,6 +53,18 @@ func printTree(path string, indent string, isLast bool, printRoot bool, showHidd
 		nextIndent = indent + BackLeaf
 	}
 
+	// Add emoji if enabled
+	var emoji string
+	if useEmoji {
+		if info, err := os.Stat(path); err == nil {
+			if info.IsDir() {
+				emoji = "📂 " // Folder emoji
+			} else {
+				emoji = determineFileEmoji(baseName)
+			}
+		}
+	}
+
 	// Add "/" at the end for directories
 	name := baseName
 	if info, err := os.Stat(path); err == nil && info.IsDir() {
@@ -60,7 +72,7 @@ func printTree(path string, indent string, isLast bool, printRoot bool, showHidd
 	}
 
 	// Print the current file or folder
-	fmt.Println(indent + branch + name)
+	fmt.Println(indent + branch + emoji + name)
 
 	// If not a directory, return
 	info, err := os.Stat(path)
@@ -74,9 +86,6 @@ func printTree(path string, indent string, isLast bool, printRoot bool, showHidd
 		fmt.Println("Error reading directory:", err)
 		return
 	}
-
-	// no need to sort actually
-	// sort.Slice(entries, func(i, j int) bool { return entries[i].Name() < entries[j].Name() })
 
 	// Filter out hidden entries and excluded names
 	var filteredEntries []os.DirEntry
@@ -92,7 +101,22 @@ func printTree(path string, indent string, isLast bool, printRoot bool, showHidd
 	for i, entry := range filteredEntries {
 		isLastEntry := i == len(filteredEntries)-1
 		childPath := filepath.Join(path, entry.Name())
-		printTree(childPath, nextIndent, isLastEntry, false, showHidden, excludeList)
+		printTree(childPath, nextIndent, isLastEntry, false, showHidden, excludeList, useEmoji)
+	}
+}
+
+// determineFileEmoji returns an appropriate emoji for a file based on its extension.
+func determineFileEmoji(name string) string {
+	ext := strings.ToLower(filepath.Ext(name))
+	switch ext {
+	case ".txt", ".md":
+		return "📄 " // Document
+	case ".py", ".sh", ".go", ".js", ".ts", ".java", ".c", ".cpp":
+		return "💻 " // Script
+	case ".exe", ".bin", ".o", ".out":
+		return "📦 " // Binary file
+	default:
+		return "📜 " // Unknown
 	}
 }
 
@@ -110,6 +134,7 @@ func main() {
 	// Command-line flags
 	showHidden := flag.Bool("a", false, "Show hidden files and directories")
 	exclude := flag.String("exclude", "", "Comma-separated list of files/directories to exclude")
+	useEmoji := flag.Bool("emoji", false, "Display emojis for files and directories")
 	flag.Parse()
 
 	// Get the directory path from the arguments
@@ -140,5 +165,5 @@ func main() {
 	}
 
 	// Print the directory tree
-	printTree(root, "", true, true, *showHidden, excludeList)
+	printTree(root, "", true, true, *showHidden, excludeList, *useEmoji)
 }
