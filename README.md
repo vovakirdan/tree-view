@@ -32,7 +32,37 @@ A simple command-line utility written in **Go** to display the directory structu
 ```bash
 sudo cp tree /usr/local/bin/tree
 ```
-2. Check access via `tree --help`. If everything is ok, you will see the help.
+---
+### For MacOS
+You can use also:
+```bash
+sudo mv tree /usr/local/bin/
+```
+But sometimes somethings goes wrong and you have no such dir. Then, of course, you can create it:
+```bash
+sudo mkdir /usr/local/bin
+```
+An then, if you don't have this path in your `$PATH` go:
+1. Open configuration file for your sh. For mac os it is zsh (`~/.zshrc`) by default, for bash it is bash profile (`~/.bash_profile`)
+```bash
+vim ~/.zshrc
+```
+2. Add `export PATH=$PATH:/usr/local/bin` to the file if don't even exists
+3. Save and run `source ~/.zshrc`
+Then you can just move it to the dir.
+
+### Via Brew
+1. Move binary file to the homebrew path:
+```bash
+mkdir -p /usr/local/Cellar/tree/1.0/bin
+mv tree /usr/local/Cellar/tree/1.0/bin/
+```
+2. Create symbol link to utility:
+```bash
+ln -s /usr/local/Cellar/tree/1.0/bin/tree /usr/local/bin/tree
+```
+### Finally:
+   **Check access via `tree --help`. If everything is ok, you will see the help.**
 
 ## Usage
 
